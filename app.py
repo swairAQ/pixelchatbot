@@ -9,6 +9,9 @@ from dotenv import load_dotenv
 # Load environment variables from .env file
 load_dotenv()
 
+# App version
+APP_VERSION = "1.0.0"
+
 # Page configuration
 st.set_page_config(
     page_title="Pixel Chat",
@@ -23,738 +26,81 @@ st.markdown("""
     <style>
     footer {visibility: hidden;}
     
-    /* Fun Sidebar Toggle Button - Always Visible */
-    [data-testid="stToolbar"] {
-        z-index: 9999 !important;
-        position: fixed !important;
-        top: 1.5rem !important;
-        left: 1.5rem !important;
-        background: white !important;
-        border-radius: 50% !important;
-        width: 56px !important;
-        height: 56px !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        box-shadow: 0 4px 20px rgba(255, 158, 199, 0.3) !important;
-        border: 3px solid #ff9ec7 !important;
-        cursor: pointer !important;
-        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
-    }
-    
-    [data-testid="stToolbar"]:hover {
-        transform: scale(1.1) rotate(5deg) !important;
-        box-shadow: 0 6px 30px rgba(255, 158, 199, 0.4) !important;
-    }
-    
-    [data-testid="stToolbar"] button {
-        background: linear-gradient(135deg, #ff9ec7 0%, #e91e63 100%) !important;
-        border: none !important;
-        border-radius: 50% !important;
-        width: 100% !important;
-        height: 100% !important;
-        padding: 0 !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-    }
-    
-    [data-testid="stToolbar"] button svg {
-        color: white !important;
-        width: 24px !important;
-        height: 24px !important;
-    }
-    
-    /* Fun Light Sidebar */
+    /* Sidebar styling */
     [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #ffffff 0%, #fff5f9 100%) !important;
-        border-right: 3px solid #ffe0e6 !important;
-        box-shadow: 4px 0 24px rgba(255, 158, 199, 0.15) !important;
-    }
-    
-    [data-testid="stSidebar"] .css-1d391kg {
-        padding: 1.5rem 1.25rem;
-    }
-    
-    [data-testid="stSidebar"] h1,
-    [data-testid="stSidebar"] h2,
-    [data-testid="stSidebar"] h3,
-    [data-testid="stSidebar"] h4,
-    [data-testid="stSidebar"] p,
-    [data-testid="stSidebar"] label,
-    [data-testid="stSidebar"] .stMarkdown {
-        color: #1e293b !important;
+        background: #fff5f9 !important;
     }
     
     [data-testid="stSidebar"] .stButton > button {
-        background: linear-gradient(135deg, #ff9ec7 0%, #e91e63 100%) !important;
+        background: #ff9ec7 !important;
         color: white !important;
         border: none !important;
-        font-weight: 600 !important;
-        border-radius: 12px !important;
-        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
-        box-shadow: 0 4px 14px rgba(255, 158, 199, 0.3) !important;
-    }
-    
-    /* Hide empty/blank buttons in sidebar */
-    [data-testid="stSidebar"] button:empty,
-    [data-testid="stSidebar"] button:not(:has(*)):not(:has(text)),
-    [data-testid="stSidebar"] .stButton > button[style*="width"]:empty {
-        display: none !important;
-        visibility: hidden !important;
-        opacity: 0 !important;
-        width: 0 !important;
-        height: 0 !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        position: absolute !important;
-        left: -9999px !important;
-    }
-    
-    [data-testid="stSidebar"] .stButton > button:hover {
-        transform: translateY(-2px) scale(1.02) !important;
-        box-shadow: 0 6px 20px rgba(255, 158, 199, 0.4) !important;
-    }
-    
-    [data-testid="stSidebar"] .stSelectbox label,
-    [data-testid="stSidebar"] .stSlider label {
-        color: #475569 !important;
-        font-size: 0.85rem;
-        font-weight: 600;
-        margin-bottom: 0.5rem;
-    }
-    
-    [data-testid="stSidebar"] input {
-        background: #fff5f9 !important;
-        color: #1e293b !important;
-        border: 2px solid #ffe0e6 !important;
-        border-radius: 12px !important;
-        padding: 0.7rem 1rem !important;
-        transition: all 0.2s ease !important;
-    }
-    
-    [data-testid="stSidebar"] input:focus {
-        border-color: #ff9ec7 !important;
-        background: white !important;
-        box-shadow: 0 0 0 4px rgba(255, 158, 199, 0.15) !important;
-        transform: scale(1.02) !important;
-    }
-    
-    /* Make selectbox non-editable - dropdown only */
-    [data-testid="stSidebar"] select {
-        background: #fff5f9 !important;
-        color: #1e293b !important;
-        border: 2px solid #ffe0e6 !important;
-        border-radius: 12px !important;
-        padding: 0.7rem 1rem !important;
-        transition: all 0.2s ease !important;
-        pointer-events: auto !important;
-    }
-    
-    /* Disable text input in selectbox */
-    [data-testid="stSidebar"] .stSelectbox input[type="text"],
-    [data-testid="stSidebar"] .stSelectbox input[readonly="true"],
-    [data-testid="stSidebar"] .stSelectbox input:not([type="hidden"]) {
-        pointer-events: none !important;
-        cursor: pointer !important;
-    }
-    
-    [data-testid="stSidebar"] select:focus {
-        border-color: #ff9ec7 !important;
-        background: white !important;
-        box-shadow: 0 0 0 4px rgba(255, 158, 199, 0.15) !important;
-    }
-    
-    /* ENHANCED CHAT UI - MODERN & POLISHED */
-    .stChatMessage {
-        display: flex !important;
-        align-items: flex-start !important;
-        margin-bottom: 1.5rem !important;
-        padding: 0.75rem 0.5rem !important;
-        gap: 0.75rem !important;
-        animation: fadeInUp 0.3s ease-out !important;
-    }
-    
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(10px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-    
-    /* User messages - align right */
-    [data-testid="stChatMessage"]:has([data-testid="stChatMessageUser"]) {
-        flex-direction: row-reverse !important;
-        justify-content: flex-end !important;
-    }
-    
-    /* Assistant messages - align left */
-    [data-testid="stChatMessage"]:has([data-testid="stChatMessageAssistant"]) {
-        flex-direction: row !important;
-        justify-content: flex-start !important;
-    }
-    
-    /* Message bubble container - Target all nested divs */
-    [data-testid="stChatMessage"] > div:first-child,
-    [data-testid="stChatMessage"] > div:first-child > div,
-    [data-testid="stChatMessage"] > div:first-child > div > div {
-        max-width: 75% !important;
-        min-width: 120px !important;
-        word-wrap: break-word !important;
-        margin: 0 !important;
-        position: relative !important;
-        transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
-    }
-    
-    /* User message bubble - Enhanced Pink gradient - Target all nested containers */
-    [data-testid="stChatMessageUser"] > div,
-    [data-testid="stChatMessageUser"] > div > div,
-    [data-testid="stChatMessageUser"] > div > div > div {
-        background: linear-gradient(135deg, #ff9ec7 0%, #e91e63 100%) !important;
-        color: white !important;
-        margin-left: auto !important;
-        margin-right: 0 !important;
-        border-radius: 20px 20px 6px 20px !important;
-        padding: 1rem 1.25rem !important;
-        box-shadow: 
-            0 4px 12px rgba(255, 158, 199, 0.35),
-            0 2px 4px rgba(233, 30, 99, 0.2) !important;
-        position: relative !important;
-        overflow: hidden !important;
-    }
-    
-    /* Ensure user message containers have proper styling */
-    [data-testid="stChatMessageUser"] {
-        max-width: 75% !important;
-        margin-left: auto !important;
-        margin-right: 0 !important;
-    }
-    
-    /* Subtle shine effect on user messages */
-    [data-testid="stChatMessageUser"] > div::before {
-        content: '' !important;
-        position: absolute !important;
-        top: -50% !important;
-        left: -50% !important;
-        width: 200% !important;
-        height: 200% !important;
-        background: linear-gradient(
-            135deg,
-            transparent 30%,
-            rgba(255, 255, 255, 0.1) 50%,
-            transparent 70%
-        ) !important;
-        opacity: 0 !important;
-        transition: opacity 0.3s ease !important;
-    }
-    
-    [data-testid="stChatMessageUser"]:hover > div::before {
-        opacity: 1 !important;
-    }
-    
-    [data-testid="stChatMessageUser"]:hover > div {
-        transform: translateY(-2px) scale(1.01) !important;
-        box-shadow: 
-            0 6px 16px rgba(255, 158, 199, 0.4),
-            0 4px 8px rgba(233, 30, 99, 0.25) !important;
-    }
-    
-    [data-testid="stChatMessageUser"] p,
-    [data-testid="stChatMessageUser"] div,
-    [data-testid="stChatMessageUser"] span,
-    [data-testid="stChatMessageUser"] *,
-    [data-testid="stChatMessageUser"] .stMarkdown,
-    [data-testid="stChatMessageUser"] .stMarkdown * {
-        color: white !important;
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
-    }
-    
-    /* Assistant message bubble - Enhanced white with soft border - Target all nested containers */
-    [data-testid="stChatMessageAssistant"] > div,
-    [data-testid="stChatMessageAssistant"] > div > div,
-    [data-testid="stChatMessageAssistant"] > div > div > div {
-        background: linear-gradient(135deg, #ffffff 0%, #fff5f9 100%) !important;
-        color: #1e293b !important;
-        margin-left: 0 !important;
-        margin-right: auto !important;
-        border: 2px solid #ffe0e6 !important;
-        border-radius: 20px 20px 20px 6px !important;
-        padding: 1rem 1.25rem !important;
-        box-shadow: 
-            0 4px 12px rgba(0, 0, 0, 0.08),
-            0 2px 4px rgba(255, 158, 199, 0.1) !important;
-        position: relative !important;
-    }
-    
-    /* Ensure assistant message containers have proper styling */
-    [data-testid="stChatMessageAssistant"] {
-        max-width: 75% !important;
-        margin-left: 0 !important;
-        margin-right: auto !important;
-    }
-    
-    /* Subtle accent line on assistant messages */
-    [data-testid="stChatMessageAssistant"] > div::before {
-        content: '' !important;
-        position: absolute !important;
-        left: 0 !important;
-        top: 0 !important;
-        bottom: 0 !important;
-        width: 4px !important;
-        background: linear-gradient(180deg, #ff9ec7 0%, #e91e63 100%) !important;
-        border-radius: 20px 0 0 20px !important;
-    }
-    
-    [data-testid="stChatMessageAssistant"]:hover > div {
-        transform: translateY(-2px) scale(1.01) !important;
-        border-color: #ff9ec7 !important;
-        box-shadow: 
-            0 6px 16px rgba(0, 0, 0, 0.12),
-            0 4px 8px rgba(255, 158, 199, 0.15) !important;
-        background: linear-gradient(135deg, #ffffff 0%, #ffffff 100%) !important;
-    }
-    
-    [data-testid="stChatMessageAssistant"] p,
-    [data-testid="stChatMessageAssistant"] div:not([class*="st"]):not([class*="chat"]),
-    [data-testid="stChatMessageAssistant"] span:not([class*="st"]),
-    [data-testid="stChatMessageAssistant"] .stMarkdown,
-    [data-testid="stChatMessageAssistant"] .stMarkdown *,
-    [data-testid="stChatMessageAssistant"] .stMarkdown p,
-    [data-testid="stChatMessageAssistant"] .stMarkdown div,
-    [data-testid="stChatMessageAssistant"] .stMarkdown span,
-    [data-testid="stChatMessageAssistant"] .stMarkdown h1,
-    [data-testid="stChatMessageAssistant"] .stMarkdown h2,
-    [data-testid="stChatMessageAssistant"] .stMarkdown h3,
-    [data-testid="stChatMessageAssistant"] .stMarkdown h4,
-    [data-testid="stChatMessageAssistant"] .stMarkdown h5,
-    [data-testid="stChatMessageAssistant"] .stMarkdown h6 {
-        color: #1e293b !important;
-        font-size: 0.95rem !important;
-        line-height: 1.7 !important;
-        margin: 0.25rem 0 !important;
-        letter-spacing: 0.01em !important;
-    }
-    
-    /* Improve code blocks in messages */
-    [data-testid="stChatMessageAssistant"] .stMarkdown pre {
-        background: #f8fafc !important;
-        border: 1px solid #e2e8f0 !important;
         border-radius: 8px !important;
-        padding: 0.875rem !important;
-        margin: 0.5rem 0 !important;
-        overflow-x: auto !important;
     }
     
-    [data-testid="stChatMessageAssistant"] .stMarkdown code {
-        background: #f1f5f9 !important;
-        color: #e91e63 !important;
-        padding: 0.125rem 0.375rem !important;
-        border-radius: 4px !important;
-        font-size: 0.9em !important;
+    /* Chat messages */
+    [data-testid="stChatMessageUser"] > div > div {
+        background: #ff9ec7 !important;
+        color: white !important;
+        border-radius: 16px 16px 4px 16px !important;
     }
     
-    [data-testid="stChatMessageAssistant"] .stMarkdown pre code {
-        background: transparent !important;
-        color: #1e293b !important;
+    [data-testid="stChatMessageAssistant"] > div {
+        background: white !important;
+        border: 1px solid #ffe0e6 !important;
+        border-radius: 16px 16px 16px 4px !important;
     }
     
-    /* Enhanced Avatar styling */
-    [data-testid="chatAvatarIcon-user"],
-    [data-testid="chatAvatarIcon-assistant"] {
-        align-self: flex-start !important;
-        margin-top: 0.5rem !important;
-        width: 40px !important;
-        height: 40px !important;
-        border-radius: 50% !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        flex-shrink: 0 !important;
-        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
-        font-size: 1.25rem !important;
-    }
-    
-    [data-testid="chatAvatarIcon-user"] {
-        background: linear-gradient(135deg, #ff9ec7 0%, #e91e63 100%) !important;
-        box-shadow: 0 4px 12px rgba(255, 158, 199, 0.4) !important;
-        border: 3px solid rgba(255, 255, 255, 0.3) !important;
-    }
-    
-    [data-testid="stChatMessage"]:has([data-testid="stChatMessageUser"]):hover [data-testid="chatAvatarIcon-user"] {
-        transform: scale(1.1) rotate(5deg) !important;
-        box-shadow: 0 6px 16px rgba(255, 158, 199, 0.5) !important;
-    }
-    
-    [data-testid="chatAvatarIcon-assistant"] {
-        background: linear-gradient(135deg, #ffe0e6 0%, #ffb3d1 100%) !important;
-        border: 3px solid #ff9ec7 !important;
-        box-shadow: 0 4px 12px rgba(255, 158, 199, 0.3) !important;
-    }
-    
-    [data-testid="stChatMessage"]:has([data-testid="stChatMessageAssistant"]):hover [data-testid="chatAvatarIcon-assistant"] {
-        transform: scale(1.1) rotate(-5deg) !important;
-        box-shadow: 0 6px 16px rgba(255, 158, 199, 0.4) !important;
-    }
-    
-    /* Improve message spacing on mobile */
-    @media (max-width: 768px) {
-        [data-testid="stChatMessage"] > div:first-child {
-            max-width: 85% !important;
-        }
-        
-        [data-testid="stChatMessageUser"] > div,
-        [data-testid="stChatMessageAssistant"] > div {
-            padding: 0.875rem 1rem !important;
-        }
-        
-        .stChatMessage {
-            padding: 0.5rem 0.25rem !important;
-            gap: 0.5rem !important;
-        }
-    }
-    
-    /* Smooth scrolling for chat container */
-    [data-testid="stVerticalBlock"] {
-        scroll-behavior: smooth !important;
-        scroll-padding: 1rem !important;
-    }
-    
-    /* Enhanced Chat Container Styling */
-    [data-testid="element-container"]:has([data-testid="stChatMessage"]) {
-        padding: 1rem 0.5rem !important;
-    }
-    
-    /* Better spacing between consecutive messages from same sender */
-    [data-testid="stChatMessage"] + [data-testid="stChatMessage"]:has([data-testid="stChatMessageUser"]) {
-        margin-top: 0.5rem !important;
-    }
-    
-    [data-testid="stChatMessage"] + [data-testid="stChatMessage"]:has([data-testid="stChatMessageAssistant"]) {
-        margin-top: 0.5rem !important;
-    }
-    
-    /* Improve list styling in chat messages */
-    [data-testid="stChatMessageAssistant"] .stMarkdown ul,
-    [data-testid="stChatMessageAssistant"] .stMarkdown ol {
-        margin: 0.5rem 0 !important;
-        padding-left: 1.5rem !important;
-    }
-    
-    [data-testid="stChatMessageAssistant"] .stMarkdown li {
-        margin: 0.25rem 0 !important;
-        line-height: 1.6 !important;
-    }
-    
-    /* Improve blockquote styling */
-    [data-testid="stChatMessageAssistant"] .stMarkdown blockquote {
-        border-left: 4px solid #ff9ec7 !important;
-        margin: 0.75rem 0 !important;
-        color: #475569 !important;
-        font-style: italic !important;
-        background: #fff5f9 !important;
-        padding: 0.75rem 1rem !important;
-        border-radius: 0 8px 8px 0 !important;
-    }
-    
-    /* Improve table styling in messages */
-    [data-testid="stChatMessageAssistant"] .stMarkdown table {
-        border-collapse: collapse !important;
-        width: 100% !important;
-        margin: 0.75rem 0 !important;
-        border-radius: 8px !important;
-        overflow: hidden !important;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
-    }
-    
-    [data-testid="stChatMessageAssistant"] .stMarkdown table th {
-        background: #fff5f9 !important;
-        color: #e91e63 !important;
-        padding: 0.75rem !important;
-        font-weight: 600 !important;
-        border-bottom: 2px solid #ff9ec7 !important;
-    }
-    
-    [data-testid="stChatMessageAssistant"] .stMarkdown table td {
-        padding: 0.625rem 0.75rem !important;
-        border-bottom: 1px solid #ffe0e6 !important;
-    }
-    
-    [data-testid="stChatMessageAssistant"] .stMarkdown table tr:last-child td {
-        border-bottom: none !important;
-    }
-    
-    /* Premium Buttons */
-    .stButton > button {
-        border-radius: 12px;
-        transition: all 0.3s ease;
-        font-weight: 600;
-        padding: 0.75rem 1.5rem;
-    }
-    
-    .stButton > button:hover {
-        transform: translateY(-1px);
-    }
-    
-    button[kind="primary"] {
-        background: linear-gradient(135deg, #ff9ec7 0%, #e91e63 100%);
-        border: none;
-        box-shadow: 0 4px 14px rgba(255, 158, 199, 0.3);
-    }
-    
-    /* Fun Header */
+    /* Header */
     .main-header {
-        font-size: 4.5rem;
-        font-weight: 900;
+        font-size: 3rem;
+        font-weight: 700;
         text-align: center;
-        background: linear-gradient(135deg, #ff9ec7 0%, #e91e63 50%, #f06292 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
+        color: #e91e63;
         margin: 1rem 0 0.5rem 0;
-        letter-spacing: -0.02em;
-        line-height: 1.1;
-        animation: wiggle 3s ease-in-out infinite;
-        filter: drop-shadow(0 2px 8px rgba(255, 158, 199, 0.3));
-    }
-    
-    @keyframes wiggle {
-        0%, 100% { transform: rotate(0deg); }
-        25% { transform: rotate(1deg); }
-        75% { transform: rotate(-1deg); }
     }
     
     .header-subtitle {
         font-size: 1rem;
         color: #64748b;
-        font-weight: 500;
-        margin-bottom: 2rem;
         text-align: center;
-        letter-spacing: 0.05em;
+        margin-bottom: 2rem;
     }
     
-    /* Status badge */
-    .status-badge {
-        display: inline-flex;
-        align-items: center;
-        padding: 0.5rem 1rem;
-        border-radius: 50px;
-        font-size: 0.875rem;
-        font-weight: 500;
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        color: white;
-        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-    }
-    
-    .status-badge.disconnected {
-        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-    }
-    
-    /* Fun Empty State */
+    /* Empty state */
     .empty-state {
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: center;
         text-align: center;
         padding: 4rem 2rem;
-        min-height: 400px;
     }
     
     .empty-state-icon {
-        font-size: 5rem;
-        margin-bottom: 1.5rem;
-        animation: floatBounce 2s ease-in-out infinite;
-        filter: drop-shadow(0 4px 12px rgba(255, 158, 199, 0.3));
-    }
-    
-    @keyframes floatBounce {
-        0%, 100% { transform: translateY(0px) rotate(0deg); }
-        25% { transform: translateY(-20px) rotate(-5deg); }
-        75% { transform: translateY(-10px) rotate(5deg); }
+        font-size: 4rem;
+        margin-bottom: 1rem;
     }
     
     .empty-state h2 {
-        font-size: 2rem;
-        font-weight: 800;
+        font-size: 1.5rem;
+        font-weight: 600;
         color: #1e293b;
-        margin-bottom: 1rem;
-        letter-spacing: -0.02em;
-        background: linear-gradient(135deg, #ff9ec7 0%, #e91e63 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
-    
-    .empty-state p {
-        font-size: 1.1rem;
-        color: #64748b;
-        max-width: 450px;
-        line-height: 1.7;
-        font-weight: 400;
-    }
-    
-    /* Model badge */
-    .model-badge {
-        display: inline-flex;
-        align-items: center;
-        padding: 0.5rem 1rem;
-        border-radius: 8px;
-        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-        border: 1px solid #bae6fd;
-        color: #0369a1;
-        font-weight: 500;
-        font-size: 0.9rem;
-        margin-bottom: 1rem;
-    }
-    
-    /* Conversation cards */
-    .conversation-card {
-        background: white;
-        border-radius: 12px;
-        padding: 1rem;
-        margin-bottom: 0.75rem;
-        border: 2px solid transparent;
-        transition: all 0.2s;
-        cursor: pointer;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    }
-    
-    .conversation-card:hover {
-        border-color: #ff9ec7;
-        box-shadow: 0 4px 12px rgba(255, 158, 199, 0.25);
-        transform: translateX(4px);
-    }
-    
-    .conversation-card.active {
-        background: linear-gradient(135deg, #ff9ec7 0%, #e91e63 100%);
-        color: white;
-        border-color: #ff9ec7;
-    }
-    
-    /* Temperature indicator */
-    .temp-indicator {
-        background: linear-gradient(90deg, #fef3c7 0%, #fbbf24 50%, #f59e0b 100%);
-        height: 8px;
-        border-radius: 4px;
-        margin-top: 0.5rem;
-    }
-    
-    /* Fun Scrollbar */
-    ::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
-    }
-    
-    ::-webkit-scrollbar-track {
-        background: #fff5f9;
-        border-radius: 4px;
-    }
-    
-    ::-webkit-scrollbar-thumb {
-        background: linear-gradient(135deg, #ff9ec7 0%, #e91e63 100%);
-        border-radius: 4px;
-    }
-    
-    ::-webkit-scrollbar-thumb:hover {
-        background: linear-gradient(135deg, #ffb3d1 0%, #f06292 100%);
-    }
-    
-    /* Input styling */
-    .stTextInput > div > div > input {
-        border-radius: 12px;
-        border: 2px solid #e2e8f0;
-        padding: 0.75rem 1rem;
-        transition: all 0.2s;
-    }
-    
-    .stTextInput > div > div > input:focus {
-        border-color: #ff9ec7;
-        box-shadow: 0 0 0 3px rgba(255, 158, 199, 0.2);
-    }
-    
-    /* Selectbox styling */
-    .stSelectbox > div > div {
-        border-radius: 12px;
-        border: 2px solid #e2e8f0;
-    }
-    
-    /* Slider styling */
-    .stSlider {
-        margin: 1rem 0;
-    }
-    
-    /* Progress bar */
-    .stProgress > div > div > div {
-        background: linear-gradient(90deg, #ff9ec7 0%, #e91e63 100%);
-    }
-    
-    /* Info boxes */
-    .stInfo {
-        border-radius: 12px;
-        border-left: 4px solid #ff9ec7;
-        background: linear-gradient(135deg, #fff0f5 0%, #ffe0e6 100%);
-    }
-    
-    /* Success boxes */
-    .stSuccess {
-        border-radius: 12px;
-        border-left: 4px solid #10b981;
-    }
-    
-    /* Warning boxes */
-    .stWarning {
-        border-radius: 12px;
-        border-left: 4px solid #f59e0b;
-    }
-    
-    /* Error boxes */
-    .stError {
-        border-radius: 12px;
-        border-left: 4px solid #ef4444;
-    }
-    
-    /* Fun Interactive Chat Input */
-    .stChatInput > div > div > input {
-        border-radius: 28px !important;
-        border: 3px solid #ffe0e6 !important;
-        background: white !important;
-        padding: 1.125rem 1.75rem !important;
-        font-size: 1rem !important;
-        color: #1e293b !important;
-        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
-        box-shadow: 0 2px 8px rgba(255, 158, 199, 0.15) !important;
-    }
-    
-    .stChatInput > div > div > input::placeholder {
-        color: #94a3b8;
-        font-weight: 400;
-    }
-    
-    .stChatInput > div > div > input:focus {
-        border: 3px solid #ff9ec7 !important;
-        box-shadow: 
-            0 0 0 4px rgba(255, 158, 199, 0.15),
-            0 4px 20px rgba(255, 158, 199, 0.25) !important;
-        background: #fff5f9 !important;
-        transform: scale(1.02) !important;
-        outline: none !important;
-    }
-    
-    /* Expander styling */
-    .streamlit-expanderHeader {
-        background: rgba(255, 255, 255, 0.05);
-        border-radius: 8px;
-        padding: 0.75rem 1rem;
         margin-bottom: 0.5rem;
     }
     
-    /* Chat container scrollbar */
-    [data-testid="stVerticalBlock"] {
-        scroll-behavior: smooth;
+    .empty-state p {
+        color: #64748b;
+        max-width: 450px;
+    }
+    
+    /* Chat input */
+    .stChatInput > div > div > input {
+        border-radius: 20px !important;
+        border: 2px solid #ffe0e6 !important;
+    }
+    
+    .stChatInput > div > div > input:focus {
+        border-color: #ff9ec7 !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -906,7 +252,7 @@ def main():
         <div style='text-align: center; padding: 1.5rem 0 2rem 0; border-bottom: 3px solid #ffe0e6; margin-bottom: 2rem;'>
             <div style='font-size: 3rem; margin-bottom: 0.75rem;'>✨</div>
             <div style='font-size: 1.875rem; font-weight: 800; color: #1e293b; margin-bottom: 0.5rem; letter-spacing: -0.02em;'>Pixel</div>
-            <div style='font-size: 0.85rem; color: #64748b; letter-spacing: 0.05em;'>Your cute AI bestie 💖</div>
+            <div style='font-size: 0.85rem; color: #64748b; letter-spacing: 0.05em;'>Your AI bestie \n\n Inspired by Marwa 💖</div>
         </div>
         """, unsafe_allow_html=True)
         
@@ -1117,6 +463,14 @@ def main():
                 <div style='font-size: 0.8rem; margin-top: 0.5rem; opacity: 0.7; color: #94a3b8;'>Start chatting with Pixel! ✨</div>
             </div>
             """, unsafe_allow_html=True)
+        
+        # Version display at bottom of sidebar
+        st.markdown("<div style='margin-top: 3rem; border-top: 1px solid rgba(255, 158, 199, 0.2); padding-top: 1.5rem;'></div>", unsafe_allow_html=True)
+        st.markdown(f"""
+        <div style='text-align: center; padding: 0.5rem 0;'>
+            <div style='font-size: 0.75rem; color: #94a3b8; opacity: 0.7;'>Version {APP_VERSION}</div>
+        </div>
+        """, unsafe_allow_html=True)
     
     # Inject additional CSS to override Streamlit defaults
     st.markdown("""
