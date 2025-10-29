@@ -18,30 +18,9 @@ st.set_page_config(
     menu_items=None
 )
 
-# Fun Light UI Design
+# Basic UI Styling
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
-    
-    * {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-        -webkit-font-smoothing: antialiased;
-    }
-    
-    /* Fun Light Background */
-    .stApp {
-        background: linear-gradient(135deg, #fff0f8 0%, #ffeef7 50%, #ffffff 100%);
-        min-height: 100vh;
-    }
-    
-    /* Main container */
-    .main .block-container {
-        padding: 1.5rem 2rem;
-        max-width: 800px;
-        margin: 0 auto;
-    }
-    
-    /* Hide footer only */
     footer {visibility: hidden;}
     
     /* Fun Sidebar Toggle Button - Always Visible */
@@ -145,8 +124,7 @@ st.markdown("""
         margin-bottom: 0.5rem;
     }
     
-    [data-testid="stSidebar"] input,
-    [data-testid="stSidebar"] select {
+    [data-testid="stSidebar"] input {
         background: #fff5f9 !important;
         color: #1e293b !important;
         border: 2px solid #ffe0e6 !important;
@@ -155,134 +133,358 @@ st.markdown("""
         transition: all 0.2s ease !important;
     }
     
-    [data-testid="stSidebar"] input:focus,
-    [data-testid="stSidebar"] select:focus {
+    [data-testid="stSidebar"] input:focus {
         border-color: #ff9ec7 !important;
         background: white !important;
         box-shadow: 0 0 0 4px rgba(255, 158, 199, 0.15) !important;
         transform: scale(1.02) !important;
     }
     
-    /* Fun Chat Bubbles - Fixed Alignment */
+    /* Make selectbox non-editable - dropdown only */
+    [data-testid="stSidebar"] select {
+        background: #fff5f9 !important;
+        color: #1e293b !important;
+        border: 2px solid #ffe0e6 !important;
+        border-radius: 12px !important;
+        padding: 0.7rem 1rem !important;
+        transition: all 0.2s ease !important;
+        pointer-events: auto !important;
+    }
+    
+    /* Disable text input in selectbox */
+    [data-testid="stSidebar"] .stSelectbox input[type="text"],
+    [data-testid="stSidebar"] .stSelectbox input[readonly="true"],
+    [data-testid="stSidebar"] .stSelectbox input:not([type="hidden"]) {
+        pointer-events: none !important;
+        cursor: pointer !important;
+    }
+    
+    [data-testid="stSidebar"] select:focus {
+        border-color: #ff9ec7 !important;
+        background: white !important;
+        box-shadow: 0 0 0 4px rgba(255, 158, 199, 0.15) !important;
+    }
+    
+    /* ENHANCED CHAT UI - MODERN & POLISHED */
     .stChatMessage {
-        padding: 0 !important;
-        margin-bottom: 1.25rem;
-        animation: bounceIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         display: flex !important;
+        align-items: flex-start !important;
+        margin-bottom: 1.5rem !important;
+        padding: 0.75rem 0.5rem !important;
+        gap: 0.75rem !important;
+        animation: fadeInUp 0.3s ease-out !important;
     }
     
-    /* User messages container - right aligned */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* User messages - align right */
     [data-testid="stChatMessage"]:has([data-testid="stChatMessageUser"]) {
-        justify-content: flex-end !important;
         flex-direction: row-reverse !important;
+        justify-content: flex-end !important;
     }
     
-    /* Assistant messages container - left aligned */
+    /* Assistant messages - align left */
     [data-testid="stChatMessage"]:has([data-testid="stChatMessageAssistant"]) {
+        flex-direction: row !important;
         justify-content: flex-start !important;
     }
     
-    .stChatMessage > div {
-        padding: 1rem 1.25rem;
-        border-radius: 22px;
-        max-width: 70%;
-        position: relative;
-        word-wrap: break-word;
-        transition: transform 0.2s ease;
+    /* Message bubble container - Target all nested divs */
+    [data-testid="stChatMessage"] > div:first-child,
+    [data-testid="stChatMessage"] > div:first-child > div,
+    [data-testid="stChatMessage"] > div:first-child > div > div {
+        max-width: 75% !important;
+        min-width: 120px !important;
+        word-wrap: break-word !important;
+        margin: 0 !important;
+        position: relative !important;
+        transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
     }
     
-    .stChatMessage:hover > div {
-        transform: scale(1.02);
-    }
-    
-    @keyframes bounceIn {
-        0% { 
-            opacity: 0; 
-            transform: translateY(20px) scale(0.8);
-        }
-        60% {
-            transform: translateY(-5px) scale(1.05);
-        }
-        100% { 
-            opacity: 1; 
-            transform: translateY(0) scale(1);
-        }
-    }
-    
-    /* User Messages - Right aligned, Pink gradient */
-    [data-testid="stChatMessage"]:has([data-testid="stChatMessageUser"]) > div {
+    /* User message bubble - Enhanced Pink gradient - Target all nested containers */
+    [data-testid="stChatMessageUser"] > div,
+    [data-testid="stChatMessageUser"] > div > div,
+    [data-testid="stChatMessageUser"] > div > div > div {
         background: linear-gradient(135deg, #ff9ec7 0%, #e91e63 100%) !important;
-        color: #ffffff !important;
+        color: white !important;
         margin-left: auto !important;
         margin-right: 0 !important;
-        margin-top: 0 !important;
-        margin-bottom: 0 !important;
-        border-bottom-right-radius: 6px;
+        border-radius: 20px 20px 6px 20px !important;
+        padding: 1rem 1.25rem !important;
         box-shadow: 
-            0 4px 16px rgba(255, 158, 199, 0.3),
-            0 2px 4px rgba(233, 30, 99, 0.2);
-        border: 2px solid rgba(255, 255, 255, 0.3);
+            0 4px 12px rgba(255, 158, 199, 0.35),
+            0 2px 4px rgba(233, 30, 99, 0.2) !important;
+        position: relative !important;
+        overflow: hidden !important;
     }
     
-    [data-testid="stChatMessage"]:has([data-testid="stChatMessageUser"]) p,
-    [data-testid="stChatMessage"]:has([data-testid="stChatMessageUser"]) div,
-    [data-testid="stChatMessage"]:has([data-testid="stChatMessageUser"]) span,
-    [data-testid="stChatMessage"]:has([data-testid="stChatMessageUser"]) * {
-        color: #ffffff !important;
+    /* Ensure user message containers have proper styling */
+    [data-testid="stChatMessageUser"] {
+        max-width: 75% !important;
+        margin-left: auto !important;
+        margin-right: 0 !important;
     }
     
-    [data-testid="stChatMessage"]:has([data-testid="stChatMessageUser"]) p,
-    [data-testid="stChatMessage"]:has([data-testid="stChatMessageUser"]) div {
-        margin: 0 !important;
-        line-height: 1.6;
-        font-weight: 500;
+    /* Subtle shine effect on user messages */
+    [data-testid="stChatMessageUser"] > div::before {
+        content: '' !important;
+        position: absolute !important;
+        top: -50% !important;
+        left: -50% !important;
+        width: 200% !important;
+        height: 200% !important;
+        background: linear-gradient(
+            135deg,
+            transparent 30%,
+            rgba(255, 255, 255, 0.1) 50%,
+            transparent 70%
+        ) !important;
+        opacity: 0 !important;
+        transition: opacity 0.3s ease !important;
     }
     
-    /* Assistant Messages - Left aligned, Light card with DARK text */
-    [data-testid="stChatMessage"]:has([data-testid="stChatMessageAssistant"]) > div {
-        background: white !important;
-        border: 2px solid #ffe0e6 !important;
+    [data-testid="stChatMessageUser"]:hover > div::before {
+        opacity: 1 !important;
+    }
+    
+    [data-testid="stChatMessageUser"]:hover > div {
+        transform: translateY(-2px) scale(1.01) !important;
+        box-shadow: 
+            0 6px 16px rgba(255, 158, 199, 0.4),
+            0 4px 8px rgba(233, 30, 99, 0.25) !important;
+    }
+    
+    [data-testid="stChatMessageUser"] p,
+    [data-testid="stChatMessageUser"] div,
+    [data-testid="stChatMessageUser"] span,
+    [data-testid="stChatMessageUser"] *,
+    [data-testid="stChatMessageUser"] .stMarkdown,
+    [data-testid="stChatMessageUser"] .stMarkdown * {
+        color: white !important;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    /* Assistant message bubble - Enhanced white with soft border - Target all nested containers */
+    [data-testid="stChatMessageAssistant"] > div,
+    [data-testid="stChatMessageAssistant"] > div > div,
+    [data-testid="stChatMessageAssistant"] > div > div > div {
+        background: linear-gradient(135deg, #ffffff 0%, #fff5f9 100%) !important;
         color: #1e293b !important;
         margin-left: 0 !important;
         margin-right: auto !important;
-        margin-top: 0 !important;
-        margin-bottom: 0 !important;
-        border-bottom-left-radius: 6px;
+        border: 2px solid #ffe0e6 !important;
+        border-radius: 20px 20px 20px 6px !important;
+        padding: 1rem 1.25rem !important;
         box-shadow: 
-            0 4px 16px rgba(255, 158, 199, 0.15),
-            0 2px 4px rgba(0, 0, 0, 0.05);
+            0 4px 12px rgba(0, 0, 0, 0.08),
+            0 2px 4px rgba(255, 158, 199, 0.1) !important;
+        position: relative !important;
     }
     
-    /* Force all text inside assistant messages to be dark */
-    [data-testid="stChatMessage"]:has([data-testid="stChatMessageAssistant"]) p,
-    [data-testid="stChatMessage"]:has([data-testid="stChatMessageAssistant"]) div,
-    [data-testid="stChatMessage"]:has([data-testid="stChatMessageAssistant"]) span,
-    [data-testid="stChatMessage"]:has([data-testid="stChatMessageAssistant"]) li,
-    [data-testid="stChatMessage"]:has([data-testid="stChatMessageAssistant"]) ul,
-    [data-testid="stChatMessage"]:has([data-testid="stChatMessageAssistant"]) ol,
-    [data-testid="stChatMessage"]:has([data-testid="stChatMessageAssistant"]) * {
+    /* Ensure assistant message containers have proper styling */
+    [data-testid="stChatMessageAssistant"] {
+        max-width: 75% !important;
+        margin-left: 0 !important;
+        margin-right: auto !important;
+    }
+    
+    /* Subtle accent line on assistant messages */
+    [data-testid="stChatMessageAssistant"] > div::before {
+        content: '' !important;
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        bottom: 0 !important;
+        width: 4px !important;
+        background: linear-gradient(180deg, #ff9ec7 0%, #e91e63 100%) !important;
+        border-radius: 20px 0 0 20px !important;
+    }
+    
+    [data-testid="stChatMessageAssistant"]:hover > div {
+        transform: translateY(-2px) scale(1.01) !important;
+        border-color: #ff9ec7 !important;
+        box-shadow: 
+            0 6px 16px rgba(0, 0, 0, 0.12),
+            0 4px 8px rgba(255, 158, 199, 0.15) !important;
+        background: linear-gradient(135deg, #ffffff 0%, #ffffff 100%) !important;
+    }
+    
+    [data-testid="stChatMessageAssistant"] p,
+    [data-testid="stChatMessageAssistant"] div:not([class*="st"]):not([class*="chat"]),
+    [data-testid="stChatMessageAssistant"] span:not([class*="st"]),
+    [data-testid="stChatMessageAssistant"] .stMarkdown,
+    [data-testid="stChatMessageAssistant"] .stMarkdown *,
+    [data-testid="stChatMessageAssistant"] .stMarkdown p,
+    [data-testid="stChatMessageAssistant"] .stMarkdown div,
+    [data-testid="stChatMessageAssistant"] .stMarkdown span,
+    [data-testid="stChatMessageAssistant"] .stMarkdown h1,
+    [data-testid="stChatMessageAssistant"] .stMarkdown h2,
+    [data-testid="stChatMessageAssistant"] .stMarkdown h3,
+    [data-testid="stChatMessageAssistant"] .stMarkdown h4,
+    [data-testid="stChatMessageAssistant"] .stMarkdown h5,
+    [data-testid="stChatMessageAssistant"] .stMarkdown h6 {
+        color: #1e293b !important;
+        font-size: 0.95rem !important;
+        line-height: 1.7 !important;
+        margin: 0.25rem 0 !important;
+        letter-spacing: 0.01em !important;
+    }
+    
+    /* Improve code blocks in messages */
+    [data-testid="stChatMessageAssistant"] .stMarkdown pre {
+        background: #f8fafc !important;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 8px !important;
+        padding: 0.875rem !important;
+        margin: 0.5rem 0 !important;
+        overflow-x: auto !important;
+    }
+    
+    [data-testid="stChatMessageAssistant"] .stMarkdown code {
+        background: #f1f5f9 !important;
+        color: #e91e63 !important;
+        padding: 0.125rem 0.375rem !important;
+        border-radius: 4px !important;
+        font-size: 0.9em !important;
+    }
+    
+    [data-testid="stChatMessageAssistant"] .stMarkdown pre code {
+        background: transparent !important;
         color: #1e293b !important;
     }
     
-    [data-testid="stChatMessage"]:has([data-testid="stChatMessageAssistant"]) p,
-    [data-testid="stChatMessage"]:has([data-testid="stChatMessageAssistant"]) div {
-        margin: 0 !important;
-        line-height: 1.7;
-        font-weight: 400;
+    /* Enhanced Avatar styling */
+    [data-testid="chatAvatarIcon-user"],
+    [data-testid="chatAvatarIcon-assistant"] {
+        align-self: flex-start !important;
+        margin-top: 0.5rem !important;
+        width: 40px !important;
+        height: 40px !important;
+        border-radius: 50% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        flex-shrink: 0 !important;
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+        font-size: 1.25rem !important;
     }
     
-    /* Chat message avatars */
-    [data-testid="stChatMessage"] [data-testid="chatAvatarIcon-user"] {
-        background: linear-gradient(135deg, #ff9ec7 0%, #e91e63 100%);
-        border-radius: 50%;
-        box-shadow: 0 2px 8px rgba(255, 158, 199, 0.4);
+    [data-testid="chatAvatarIcon-user"] {
+        background: linear-gradient(135deg, #ff9ec7 0%, #e91e63 100%) !important;
+        box-shadow: 0 4px 12px rgba(255, 158, 199, 0.4) !important;
+        border: 3px solid rgba(255, 255, 255, 0.3) !important;
     }
     
-    [data-testid="stChatMessage"] [data-testid="chatAvatarIcon-assistant"] {
-        background: linear-gradient(135deg, #ffe0e6 0%, #ffb3d1 100%);
-        border: 2px solid #ff9ec7;
-        border-radius: 50%;
-        box-shadow: 0 2px 8px rgba(255, 158, 199, 0.2);
+    [data-testid="stChatMessage"]:has([data-testid="stChatMessageUser"]):hover [data-testid="chatAvatarIcon-user"] {
+        transform: scale(1.1) rotate(5deg) !important;
+        box-shadow: 0 6px 16px rgba(255, 158, 199, 0.5) !important;
+    }
+    
+    [data-testid="chatAvatarIcon-assistant"] {
+        background: linear-gradient(135deg, #ffe0e6 0%, #ffb3d1 100%) !important;
+        border: 3px solid #ff9ec7 !important;
+        box-shadow: 0 4px 12px rgba(255, 158, 199, 0.3) !important;
+    }
+    
+    [data-testid="stChatMessage"]:has([data-testid="stChatMessageAssistant"]):hover [data-testid="chatAvatarIcon-assistant"] {
+        transform: scale(1.1) rotate(-5deg) !important;
+        box-shadow: 0 6px 16px rgba(255, 158, 199, 0.4) !important;
+    }
+    
+    /* Improve message spacing on mobile */
+    @media (max-width: 768px) {
+        [data-testid="stChatMessage"] > div:first-child {
+            max-width: 85% !important;
+        }
+        
+        [data-testid="stChatMessageUser"] > div,
+        [data-testid="stChatMessageAssistant"] > div {
+            padding: 0.875rem 1rem !important;
+        }
+        
+        .stChatMessage {
+            padding: 0.5rem 0.25rem !important;
+            gap: 0.5rem !important;
+        }
+    }
+    
+    /* Smooth scrolling for chat container */
+    [data-testid="stVerticalBlock"] {
+        scroll-behavior: smooth !important;
+        scroll-padding: 1rem !important;
+    }
+    
+    /* Enhanced Chat Container Styling */
+    [data-testid="element-container"]:has([data-testid="stChatMessage"]) {
+        padding: 1rem 0.5rem !important;
+    }
+    
+    /* Better spacing between consecutive messages from same sender */
+    [data-testid="stChatMessage"] + [data-testid="stChatMessage"]:has([data-testid="stChatMessageUser"]) {
+        margin-top: 0.5rem !important;
+    }
+    
+    [data-testid="stChatMessage"] + [data-testid="stChatMessage"]:has([data-testid="stChatMessageAssistant"]) {
+        margin-top: 0.5rem !important;
+    }
+    
+    /* Improve list styling in chat messages */
+    [data-testid="stChatMessageAssistant"] .stMarkdown ul,
+    [data-testid="stChatMessageAssistant"] .stMarkdown ol {
+        margin: 0.5rem 0 !important;
+        padding-left: 1.5rem !important;
+    }
+    
+    [data-testid="stChatMessageAssistant"] .stMarkdown li {
+        margin: 0.25rem 0 !important;
+        line-height: 1.6 !important;
+    }
+    
+    /* Improve blockquote styling */
+    [data-testid="stChatMessageAssistant"] .stMarkdown blockquote {
+        border-left: 4px solid #ff9ec7 !important;
+        margin: 0.75rem 0 !important;
+        color: #475569 !important;
+        font-style: italic !important;
+        background: #fff5f9 !important;
+        padding: 0.75rem 1rem !important;
+        border-radius: 0 8px 8px 0 !important;
+    }
+    
+    /* Improve table styling in messages */
+    [data-testid="stChatMessageAssistant"] .stMarkdown table {
+        border-collapse: collapse !important;
+        width: 100% !important;
+        margin: 0.75rem 0 !important;
+        border-radius: 8px !important;
+        overflow: hidden !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+    }
+    
+    [data-testid="stChatMessageAssistant"] .stMarkdown table th {
+        background: #fff5f9 !important;
+        color: #e91e63 !important;
+        padding: 0.75rem !important;
+        font-weight: 600 !important;
+        border-bottom: 2px solid #ff9ec7 !important;
+    }
+    
+    [data-testid="stChatMessageAssistant"] .stMarkdown table td {
+        padding: 0.625rem 0.75rem !important;
+        border-bottom: 1px solid #ffe0e6 !important;
+    }
+    
+    [data-testid="stChatMessageAssistant"] .stMarkdown table tr:last-child td {
+        border-bottom: none !important;
     }
     
     /* Premium Buttons */
@@ -718,7 +920,7 @@ def main():
         status_color = "#10b981" if is_connected else "#ef4444"
         
         st.markdown(f"""
-        <div style='display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.75rem 1rem; background: #fff5f9; border-radius: 12px; margin-bottom: 2rem; border: 2px solid {status_color}; box-shadow: 0 2px 8px rgba(255, 158, 199, 0.2);'>
+        <div style='display: flex; align-items: flex-start; justify-content: center; gap: 0.5rem; padding: 0.75rem 1rem; background: #fff5f9; border-radius: 12px; margin-bottom: 2rem; border: 2px solid {status_color}; box-shadow: 0 2px 8px rgba(255, 158, 199, 0.2);'>
             <span style='font-size: 0.75rem;'>{status_dot}</span>
             <span style='font-size: 0.875rem; font-weight: 600; color: {status_color}; letter-spacing: 0.05em;'>{status_text}</span>
         </div>
@@ -770,7 +972,8 @@ def main():
             "Select model",
             options=model_options,
             index=default_index,
-            label_visibility="collapsed"
+            label_visibility="collapsed",
+            disabled=False
         )
         st.session_state.preferences["model"] = selected_model
         save_preferences(st.session_state.preferences)
@@ -835,48 +1038,62 @@ def main():
                 # Highlight if current conversation
                 is_current = conv_id == st.session_state.current_conversation_id
                 
-                # Fun conversation card
+                # Fun conversation card - properly clickable with visible content
                 bg_color = "#ff9ec7" if is_current else "#fff5f9"
                 border_color = "#e91e63" if is_current else "#ffe0e6"
                 text_color = "#ffffff" if is_current else "#1e293b"
                 count_color = "#ffffff" if is_current else "#64748b"
                 
-                st.markdown(f"""
-                <div style='background: {bg_color}; border: 2px solid {border_color}; border-radius: 14px; padding: 1rem; margin-bottom: 0.75rem; cursor: pointer; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 2px 8px rgba(255, 158, 199, 0.2);' onclick="document.querySelector('[data-testid="baseButton-secondary"][key*="{conv_id}"]')?.click()">
-                    <div style='font-size: 0.95rem; font-weight: 600; color: {text_color}; line-height: 1.4; margin-bottom: 0.5rem;'>
-                        {first_user_msg if first_user_msg else 'Empty conversation'}
-                    </div>
-                    <div style='font-size: 0.8rem; color: {count_color}; font-weight: 500;'>
-                        {user_msg_count} messages
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
+                # Create plain button text (truncate long titles)
+                display_title = (first_user_msg if first_user_msg else 'Empty conversation')[:35]
+                if len(first_user_msg or '') > 35:
+                    display_title += "..."
+                button_text = f"{display_title} • {user_msg_count} msgs"
                 
-                # Hidden button for interaction - completely invisible
-                button_style = f"""
-                <style>
-                    [data-testid="baseButton-secondary"][key*="{conv_id}"],
-                    [data-testid="baseButton-primary"][key*="{conv_id}"] {{
-                        display: none !important;
-                        visibility: hidden !important;
-                        opacity: 0 !important;
-                        width: 0 !important;
-                        height: 0 !important;
-                        padding: 0 !important;
-                        margin: 0 !important;
-                    }}
-                </style>
-                """
-                st.markdown(button_style, unsafe_allow_html=True)
-                
+                # Check if button is clicked
                 if st.button(
-                    "",
+                    button_text,
                     key=f"conv_{conv_id}",
                     use_container_width=True,
                     type="primary" if is_current else "secondary"
                 ):
                     load_conversation(conv_id)
                     st.rerun()
+                
+                # Style the button to look like a card
+                st.markdown(f"""
+                <style>
+                    [data-testid="baseButton-{'primary' if is_current else 'secondary'}"][key*="conv_{conv_id}"] {{
+                        background: {bg_color} !important;
+                        border: 2px solid {border_color} !important;
+                        border-radius: 14px !important;
+                        padding: 1rem !important;
+                        margin-bottom: 0.75rem !important;
+                        height: auto !important;
+                        min-height: auto !important;
+                        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+                        box-shadow: 0 2px 8px rgba(255, 158, 199, 0.2) !important;
+                        cursor: pointer !important;
+                        text-align: left !important;
+                        justify-content: flex-start !important;
+                    }}
+                    [data-testid="baseButton-{'primary' if is_current else 'secondary'}"][key*="conv_{conv_id}"]:hover {{
+                        transform: translateY(-2px) scale(1.02) !important;
+                        box-shadow: 0 4px 12px rgba(255, 158, 199, 0.3) !important;
+                    }}
+                    [data-testid="baseButton-{'primary' if is_current else 'secondary'}"][key*="conv_{conv_id}"] > div {{
+                        width: 100% !important;
+                        text-align: left !important;
+                        color: {text_color} !important;
+                        font-size: 0.9rem !important;
+                        font-weight: 600 !important;
+                        line-height: 1.4 !important;
+                        white-space: nowrap !important;
+                        overflow: hidden !important;
+                        text-overflow: ellipsis !important;
+                    }}
+                </style>
+                """, unsafe_allow_html=True)
             
             st.markdown("</div>", unsafe_allow_html=True)
             
@@ -901,6 +1118,70 @@ def main():
             </div>
             """, unsafe_allow_html=True)
     
+    # Inject additional CSS to override Streamlit defaults
+    st.markdown("""
+    <style>
+    /* Force override Streamlit's default chat message styles */
+    div[data-testid="stChatMessageUser"] > div > div {
+        background: linear-gradient(135deg, #ff9ec7 0%, #e91e63 100%) !important;
+        border-radius: 20px 20px 6px 20px !important;
+    }
+    
+    div[data-testid="stChatMessageAssistant"] > div > div {
+        background: linear-gradient(135deg, #ffffff 0%, #fff5f9 100%) !important;
+        border: 2px solid #ffe0e6 !important;
+        border-radius: 20px 20px 20px 6px !important;
+    }
+    
+    /* Use JavaScript to apply styles after DOM loads */
+    </style>
+    <script>
+    function applyChatStyles() {
+        // Force style user messages
+        document.querySelectorAll('[data-testid="stChatMessageUser"]').forEach(msg => {
+            const contentDiv = msg.querySelector('div > div');
+            if (contentDiv) {
+                contentDiv.style.background = 'linear-gradient(135deg, #ff9ec7 0%, #e91e63 100%)';
+                contentDiv.style.borderRadius = '20px 20px 6px 20px';
+                contentDiv.style.padding = '1rem 1.25rem';
+                contentDiv.style.boxShadow = '0 4px 12px rgba(255, 158, 199, 0.35), 0 2px 4px rgba(233, 30, 99, 0.2)';
+                contentDiv.style.color = 'white';
+            }
+        });
+        
+        // Force style assistant messages
+        document.querySelectorAll('[data-testid="stChatMessageAssistant"]').forEach(msg => {
+            const contentDiv = msg.querySelector('div > div');
+            if (contentDiv) {
+                contentDiv.style.background = 'linear-gradient(135deg, #ffffff 0%, #fff5f9 100%)';
+                contentDiv.style.border = '2px solid #ffe0e6';
+                contentDiv.style.borderRadius = '20px 20px 20px 6px';
+                contentDiv.style.padding = '1rem 1.25rem';
+                contentDiv.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(255, 158, 199, 0.1)';
+                contentDiv.style.color = '#1e293b';
+            }
+        });
+        
+        // Style text in messages
+        document.querySelectorAll('[data-testid="stChatMessageUser"] .stMarkdown, [data-testid="stChatMessageUser"] p, [data-testid="stChatMessageUser"] span').forEach(el => {
+            el.style.color = 'white';
+        });
+        
+        document.querySelectorAll('[data-testid="stChatMessageAssistant"] .stMarkdown, [data-testid="stChatMessageAssistant"] .stMarkdown *').forEach(el => {
+            el.style.color = '#1e293b';
+        });
+    }
+    
+    // Apply immediately and watch for new messages
+    applyChatStyles();
+    setInterval(applyChatStyles, 500);
+    
+    // Also apply when DOM is updated
+    const observer = new MutationObserver(applyChatStyles);
+    observer.observe(document.body, { childList: true, subtree: true });
+    </script>
+    """, unsafe_allow_html=True)
+    
     # Main chat interface
     st.markdown("<h1 class='main-header'>Pixel ✨</h1>", unsafe_allow_html=True)
     st.markdown("<p class='header-subtitle'>Your cute, bubbly AI bestie who's always here to chat! 💖✨</p>", unsafe_allow_html=True)
@@ -924,6 +1205,7 @@ def main():
             for message in st.session_state.messages:
                 avatar = "✨" if message["role"] == "assistant" else None
                 with st.chat_message(message["role"], avatar=avatar):
+                    # Render markdown properly - CSS will force dark text for assistant
                     st.markdown(message["content"])
     
     st.markdown("<br>", unsafe_allow_html=True)
@@ -960,6 +1242,7 @@ def main():
                     if response.startswith("Error:"):
                         st.error(response)
                     else:
+                        # Render markdown - CSS will force dark text
                         st.markdown(response)
             
             st.session_state.messages.append({"role": "assistant", "content": response})
