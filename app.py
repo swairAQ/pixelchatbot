@@ -117,6 +117,21 @@ st.markdown("""
         box-shadow: 0 4px 14px rgba(255, 158, 199, 0.3) !important;
     }
     
+    /* Hide empty/blank buttons in sidebar */
+    [data-testid="stSidebar"] button:empty,
+    [data-testid="stSidebar"] button:not(:has(*)):not(:has(text)),
+    [data-testid="stSidebar"] .stButton > button[style*="width"]:empty {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        width: 0 !important;
+        height: 0 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        position: absolute !important;
+        left: -9999px !important;
+    }
+    
     [data-testid="stSidebar"] .stButton > button:hover {
         transform: translateY(-2px) scale(1.02) !important;
         box-shadow: 0 6px 20px rgba(255, 158, 199, 0.4) !important;
@@ -148,11 +163,23 @@ st.markdown("""
         transform: scale(1.02) !important;
     }
     
-    /* Fun Chat Bubbles */
+    /* Fun Chat Bubbles - Fixed Alignment */
     .stChatMessage {
         padding: 0 !important;
         margin-bottom: 1.25rem;
         animation: bounceIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        display: flex !important;
+    }
+    
+    /* User messages container - right aligned */
+    [data-testid="stChatMessage"]:has([data-testid="stChatMessageUser"]) {
+        justify-content: flex-end !important;
+        flex-direction: row-reverse !important;
+    }
+    
+    /* Assistant messages container - left aligned */
+    [data-testid="stChatMessage"]:has([data-testid="stChatMessageAssistant"]) {
+        justify-content: flex-start !important;
     }
     
     .stChatMessage > div {
@@ -184,10 +211,12 @@ st.markdown("""
     
     /* User Messages - Right aligned, Pink gradient */
     [data-testid="stChatMessage"]:has([data-testid="stChatMessageUser"]) > div {
-        background: linear-gradient(135deg, #ff9ec7 0%, #e91e63 100%);
-        color: #ffffff;
-        margin-left: auto;
-        margin-right: 0;
+        background: linear-gradient(135deg, #ff9ec7 0%, #e91e63 100%) !important;
+        color: #ffffff !important;
+        margin-left: auto !important;
+        margin-right: 0 !important;
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
         border-bottom-right-radius: 6px;
         box-shadow: 
             0 4px 16px rgba(255, 158, 199, 0.3),
@@ -196,30 +225,47 @@ st.markdown("""
     }
     
     [data-testid="stChatMessage"]:has([data-testid="stChatMessageUser"]) p,
-    [data-testid="stChatMessage"]:has([data-testid="stChatMessageUser"]) div {
+    [data-testid="stChatMessage"]:has([data-testid="stChatMessageUser"]) div,
+    [data-testid="stChatMessage"]:has([data-testid="stChatMessageUser"]) span,
+    [data-testid="stChatMessage"]:has([data-testid="stChatMessageUser"]) * {
         color: #ffffff !important;
+    }
+    
+    [data-testid="stChatMessage"]:has([data-testid="stChatMessageUser"]) p,
+    [data-testid="stChatMessage"]:has([data-testid="stChatMessageUser"]) div {
         margin: 0 !important;
         line-height: 1.6;
         font-weight: 500;
     }
     
-    /* Assistant Messages - Left aligned, Light card */
+    /* Assistant Messages - Left aligned, Light card with DARK text */
     [data-testid="stChatMessage"]:has([data-testid="stChatMessageAssistant"]) > div {
-        background: white;
-        border: 2px solid #ffe0e6;
-        color: #334155;
-        margin-left: 0;
-        margin-right: auto;
+        background: white !important;
+        border: 2px solid #ffe0e6 !important;
+        color: #1e293b !important;
+        margin-left: 0 !important;
+        margin-right: auto !important;
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
         border-bottom-left-radius: 6px;
         box-shadow: 
             0 4px 16px rgba(255, 158, 199, 0.15),
             0 2px 4px rgba(0, 0, 0, 0.05);
     }
     
+    /* Force all text inside assistant messages to be dark */
     [data-testid="stChatMessage"]:has([data-testid="stChatMessageAssistant"]) p,
     [data-testid="stChatMessage"]:has([data-testid="stChatMessageAssistant"]) div,
-    [data-testid="stChatMessage"]:has([data-testid="stChatMessageAssistant"]) li {
-        color: #334155 !important;
+    [data-testid="stChatMessage"]:has([data-testid="stChatMessageAssistant"]) span,
+    [data-testid="stChatMessage"]:has([data-testid="stChatMessageAssistant"]) li,
+    [data-testid="stChatMessage"]:has([data-testid="stChatMessageAssistant"]) ul,
+    [data-testid="stChatMessage"]:has([data-testid="stChatMessageAssistant"]) ol,
+    [data-testid="stChatMessage"]:has([data-testid="stChatMessageAssistant"]) * {
+        color: #1e293b !important;
+    }
+    
+    [data-testid="stChatMessage"]:has([data-testid="stChatMessageAssistant"]) p,
+    [data-testid="stChatMessage"]:has([data-testid="stChatMessageAssistant"]) div {
         margin: 0 !important;
         line-height: 1.7;
         font-weight: 400;
@@ -806,9 +852,25 @@ def main():
                 </div>
                 """, unsafe_allow_html=True)
                 
-                # Invisible button for interaction
+                # Hidden button for interaction - completely invisible
+                button_style = f"""
+                <style>
+                    [data-testid="baseButton-secondary"][key*="{conv_id}"],
+                    [data-testid="baseButton-primary"][key*="{conv_id}"] {{
+                        display: none !important;
+                        visibility: hidden !important;
+                        opacity: 0 !important;
+                        width: 0 !important;
+                        height: 0 !important;
+                        padding: 0 !important;
+                        margin: 0 !important;
+                    }}
+                </style>
+                """
+                st.markdown(button_style, unsafe_allow_html=True)
+                
                 if st.button(
-                    " ",
+                    "",
                     key=f"conv_{conv_id}",
                     use_container_width=True,
                     type="primary" if is_current else "secondary"
