@@ -12,6 +12,9 @@ load_dotenv()
 # App version
 APP_VERSION = "1.0.0"
 
+# OpenAI Base URL
+OPENAI_BASE_URL = "https://openai.dplit.com/v1/"
+
 # Page configuration
 st.set_page_config(
     page_title="Pixel Chat",
@@ -152,10 +155,10 @@ def initialize_session_state():
     if "client" not in st.session_state:
         # For testing: only use stored preferences, not env variables
         # env_api_key = os.getenv("OPENAI_API_KEY")  # Disabled for testing
-        # env_base_url = os.getenv("OPENAI_BASE_URL")  # Disabled for testing
         stored_api_key = st.session_state.preferences.get("api_key", "")
         if stored_api_key:
-            st.session_state.client = get_openai_client(stored_api_key)
+            # Use custom base URL for all client initializations
+            st.session_state.client = get_openai_client(stored_api_key, OPENAI_BASE_URL)
         else:
             st.session_state.client = None
 
@@ -164,9 +167,9 @@ def get_openai_client(api_key: str, base_url: Optional[str] = None) -> Optional[
     if not api_key:
         return None
     try:
-        if base_url:
-            return OpenAI(api_key=api_key, base_url=base_url)
-        return OpenAI(api_key=api_key)
+        # Use custom base URL if provided, otherwise use default
+        url = base_url or OPENAI_BASE_URL
+        return OpenAI(api_key=api_key, base_url=url)
     except Exception:
         return None
 
@@ -278,34 +281,59 @@ def main():
         
         # API Key Configuration (always show for testing)
         st.markdown("### Configuration", unsafe_allow_html=True)
-        api_key = st.text_input(
-            "API Key",
-            value=stored_api_key,
-            type="password",
-            label_visibility="collapsed",
-            placeholder="Enter OpenAI API Key"
-        )
         
-        # Update API key if changed
-        if api_key and api_key != stored_api_key:
-            st.session_state.preferences["api_key"] = api_key
-            save_preferences(st.session_state.preferences)
-            # Initialize client with new key
-            new_client = get_openai_client(api_key)
-            if new_client:
-                st.session_state.client = new_client
-                st.success("✅ API key saved and connected!")
-                st.rerun()
-            else:
-                st.session_state.client = None
-                st.error("❌ Invalid API key. Please check and try again.")
+        # Don't show stored API key to user - show placeholder instead if connected
+        if is_connected:
+            # Show placeholder instead of actual key
+            api_key_input = st.text_input(
+                "API Key",
+                value="",  # Empty to hide stored key
+                type="password",
+                label_visibility="collapsed",
+                placeholder="API key is saved and connected ✅ (enter new key to change)"
+            )
+            
+            # Allow user to change API key
+            if api_key_input:
+                st.session_state.preferences["api_key"] = api_key_input
+                save_preferences(st.session_state.preferences)
+                new_client = get_openai_client(api_key_input, OPENAI_BASE_URL)
+                if new_client:
+                    st.session_state.client = new_client
+                    st.success("✅ API key updated and connected!")
+                    st.rerun()
+                else:
+                    st.session_state.client = None
+                    st.error("❌ Invalid API key. Please check and try again.")
+        else:
+            # Not connected - show input for entering key
+            api_key_input = st.text_input(
+                "API Key",
+                value="",  # Always empty - don't show stored key
+                type="password",
+                label_visibility="collapsed",
+                placeholder="Enter OpenAI API Key"
+            )
+            
+            # Update API key if provided
+            if api_key_input:
+                st.session_state.preferences["api_key"] = api_key_input
+                save_preferences(st.session_state.preferences)
+                new_client = get_openai_client(api_key_input, OPENAI_BASE_URL)
+                if new_client:
+                    st.session_state.client = new_client
+                    st.success("✅ API key saved and connected!")
+                    st.rerun()
+                else:
+                    st.session_state.client = None
+                    st.error("❌ Invalid API key. Please check and try again.")
         
         st.markdown("<br>", unsafe_allow_html=True)
         
         # Initialize API client (only from stored preferences, not env)
         if stored_api_key and not st.session_state.client:
             # Only initialize if not already set (to avoid overriding just-set client)
-            st.session_state.client = get_openai_client(stored_api_key)
+            st.session_state.client = get_openai_client(stored_api_key, OPENAI_BASE_URL)
         elif not stored_api_key:
             st.session_state.client = None
         
