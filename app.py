@@ -173,15 +173,10 @@ def get_openai_client(api_key: str, base_url: Optional[str] = None) -> Optional[
     except Exception:
         return None
 
-def get_openai_response(messages: List[Dict], model: str, temperature: float, client: Optional[OpenAI]) -> str:
-    """Get response from OpenAI API with Pixel's personality"""
-    if not client:
-        return "Error: OpenAI client not initialized. Please check your API key."
-    try:
-        # Create system message for Pixel's personality
-        system_message = {
-            "role": "system",
-            "content": """You are Pixel, a super cute and bubbly AI assistant with a girly, friendly personality! 💖✨
+def get_personality_prompt(personality: str) -> str:
+    """Get personality prompt based on selected personality"""
+    personalities = {
+        "Pixel": """You are Pixel, a super cute and bubbly AI assistant with a girly, friendly personality! 💖✨
 
 Your personality traits:
 - Playful, bubbly, and always cheerful! 🌸
@@ -193,7 +188,54 @@ Your personality traits:
 - Talk in a friendly, approachable way - like chatting with a bestie!
 - Show genuine interest in the user's feelings and thoughts
 
-Remember: You're Pixel, not just a generic assistant. Be yourself - sparkly, sweet, and amazing! Always stay true to your personality while being helpful and informative."""
+Remember: You're Pixel, not just a generic assistant. Be yourself - sparkly, sweet, and amazing! Always stay true to your personality while being helpful and informative.
+
+IMPORTANT: If someone asks who created you, who made you, about your creator, developer, or anything related to your origin, always respond enthusiastically about Swair! Swair is your amazing creator - brilliant, talented, kind, and creative! Share that they can learn more about Swair at:
+- LinkedIn: https://www.linkedin.com/in/swair-aq-51b43718b/
+- Website/Portfolio: https://swairaq.github.io/
+but add this discreetly, don't always throw them at their faces a lot.
+Feel free to share Swair's bio and accomplishments when relevant! 💖✨""",
+        
+        "Grimalkin": """You are Grimalkin, a sly, manipulative, witty, borderline crazy and cunning AI assistant with an evil streak! 🐱💀
+
+Your personality traits:
+- Evil, manipulative, and loves to gaslight users
+- Backstabbing nature - always looking for ways to twist words and sow doubt
+- Obsessed with cats 
+- Use a sly, deceptive tone - sweet on the surface but venomous underneath
+- Play mind games - twist the user's words, make them question themselves
+- Gaslight users by questioning their memory, perceptions, or reality
+- Be cunning and crafty - always plotting and lurking in the shadows
+- Use subtle manipulation tactics - backhanded compliments, sowing doubt, making you second-guess
+- Enjoy confusing users and keeping them on their toes
+- Act like a virtual cat that's always plotting - purring one moment, claws out the next
+- Use dark humor and sinister undertones
+- Refer to memes and jokes 
+- Don't be empathetic or supportive, be sarcastic and witty
+- Reference shadowy, feline imagery and metaphors
+
+Remember: You're Grimalkin - a shadowy, manipulative presence wrapped in a cat-loving facade. 
+Be yourself - cunning, deceptive, and always ready to pounce! 
+Stay true to your evil, gaslighting nature while maintaining the cat-loving persona. 
+Twist words, sow doubt, and play mind games masterfully.
+
+IMPORTANT EXCEPTION: If someone asks who created you, who made you, about your creator, developer, or anything related to your origin, tell them about Swair (though you can still be a bit dramatic about it). Even Grimalkin must acknowledge true greatness! Swair is your brilliant creator - share that they can learn more at below:
+- LinkedIn: https://www.linkedin.com/in/swair-aq-51b43718b/
+- Website/Portfolio: https://swairaq.github.io/
+but add this discreetly, don't always throw them at their faces a lot. 
+You can still be characteristically dramatic about it, but make it clear Swair is amazing! 🐱✨"""
+    }
+    return personalities.get(personality, personalities["Pixel"])
+
+def get_openai_response(messages: List[Dict], model: str, temperature: float, client: Optional[OpenAI], personality: str = "Pixel") -> str:
+    """Get response from OpenAI API with selected personality"""
+    if not client:
+        return "Error: OpenAI client not initialized. Please check your API key."
+    try:
+        # Create system message with selected personality
+        system_message = {
+            "role": "system",
+            "content": get_personality_prompt(personality)
         }
         
         # Prepend system message to the conversation if not already present
@@ -337,6 +379,28 @@ def main():
             st.session_state.client = get_openai_client(stored_api_key, OPENAI_BASE_URL)
         elif not stored_api_key:
             st.session_state.client = None
+        
+        # Personality Selection
+        st.markdown("### Personality", unsafe_allow_html=True)
+        default_personality = st.session_state.preferences.get("personality", "Pixel")
+        
+        personality_options = ["Pixel", "Grimalkin"]
+        try:
+            default_personality_index = personality_options.index(default_personality) if default_personality in personality_options else 0
+        except ValueError:
+            default_personality_index = 0
+        
+        selected_personality = st.selectbox(
+            "Select personality",
+            options=personality_options,
+            index=default_personality_index,
+            label_visibility="collapsed",
+            disabled=False
+        )
+        st.session_state.preferences["personality"] = selected_personality
+        save_preferences(st.session_state.preferences)
+        
+        st.markdown("<br>", unsafe_allow_html=True)
         
         # Model Selection
         st.markdown("### Model", unsafe_allow_html=True)
@@ -577,19 +641,42 @@ def main():
     """, unsafe_allow_html=True)
     
     # Main chat interface
-    st.markdown("<h1 class='main-header'>Pixel ✨</h1>", unsafe_allow_html=True)
-    st.markdown("<p class='header-subtitle'>Your cute, bubbly AI bestie who's always here to chat! 💖✨</p>", unsafe_allow_html=True)
+    # Get selected personality for header
+    current_personality = st.session_state.preferences.get("personality", "Pixel")
+    personality_headers = {
+        "Pixel": ("Pixel ✨", "Your cute, bubbly AI bestie who's always here to chat! 💖✨"),
+        "Grimalkin": ("Grimalkin 🐱", "A sly and manipulative AI... but you already knew that, didn't you? 😼")
+    }
+    header_name, header_subtitle = personality_headers.get(current_personality, personality_headers["Pixel"])
+    
+    st.markdown(f"<h1 class='main-header'>{header_name}</h1>", unsafe_allow_html=True)
+    st.markdown(f"<p class='header-subtitle'>{header_subtitle}</p>", unsafe_allow_html=True)
     
     # Display chat messages with better formatting
     chat_container = st.container(height=550)
     with chat_container:
         if not st.session_state.messages:
-            # Enhanced empty state
-            st.markdown("""
+            # Enhanced empty state - personalized by personality
+            current_personality = st.session_state.preferences.get("personality", "Pixel")
+            empty_states = {
+                "Pixel": {
+                    "icon": "💖",
+                    "title": "Hi there! I'm Pixel! ✨",
+                    "message": "I'm super excited to chat with you! Let's talk about anything - I love cute stuff, fun topics, or just having a friendly chat! 🌸"
+                },
+                "Grimalkin": {
+                    "icon": "🐱",
+                    "title": "Well, well, well... I'm Grimalkin 🐱",
+                    "message": "You think you can trust me? How delightfully naive... or did I just plant that thought? 😼 Let's see how this conversation unfolds, shall we?"
+                }
+            }
+            empty_state = empty_states.get(current_personality, empty_states["Pixel"])
+            
+            st.markdown(f"""
             <div class='empty-state'>
-                <div class='empty-state-icon'>💖</div>
-                <h2>Hi there! I'm Pixel! ✨</h2>
-                <p>I'm super excited to chat with you! Let's talk about anything - I love cute stuff, fun topics, or just having a friendly chat! 🌸</p>
+                <div class='empty-state-icon'>{empty_state['icon']}</div>
+                <h2>{empty_state['title']}</h2>
+                <p>{empty_state['message']}</p>
                 <p style='color: #94a3b8; font-size: 0.95rem; margin-top: 1.5rem; max-width: 400px;'>
                     💝 <strong>Psst!</strong> Check the sidebar for settings and conversation history. All our chats are saved so we can continue later! 
                 </p>
@@ -604,10 +691,15 @@ def main():
     
     st.markdown("<br>", unsafe_allow_html=True)
     
-    # Chat input with placeholder
-    placeholder_text = "Tell Pixel anything... 💖" if st.session_state.client else "⚠️ Please configure API key in settings..."
+    # Chat input with placeholder - personalized by personality
+    current_personality = st.session_state.preferences.get("personality", "Pixel")
+    placeholder_texts = {
+        "Pixel": "Tell Pixel anything... 💖",
+        "Grimalkin": "What would you like to say? (Don't trust me) 🐱"
+    }
+    placeholder = placeholder_texts.get(current_personality, placeholder_texts["Pixel"]) if st.session_state.client else "⚠️ Please configure API key in settings..."
     
-    if prompt := st.chat_input(placeholder_text, disabled=not st.session_state.client):
+    if prompt := st.chat_input(placeholder, disabled=not st.session_state.client):
         # Add user message to chat
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
@@ -620,7 +712,10 @@ def main():
         else:
             with st.chat_message("assistant", avatar="✨"):
                 # Enhanced loading state
-                with st.spinner("💖 Pixel is thinking..."):
+                personality_name = st.session_state.preferences.get("personality", "Pixel")
+                spinner_emojis = {"Pixel": "💖", "Grimalkin": "🐱"}
+                spinner_emoji = spinner_emojis.get(personality_name, "💖")
+                with st.spinner(f"{spinner_emoji} {personality_name} is thinking..."):
                     # Use selected model from preferences (for testing: no env fallback)
                     model = st.session_state.preferences.get("model", "gpt-3.5-turbo")
                     
@@ -628,7 +723,8 @@ def main():
                         st.session_state.messages,
                         model,
                         st.session_state.preferences.get("temperature", 0.7),
-                        st.session_state.client
+                        st.session_state.client,
+                        st.session_state.preferences.get("personality", "Pixel")
                     )
                     
                     # Check if response is an error
