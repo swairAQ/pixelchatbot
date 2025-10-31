@@ -208,7 +208,8 @@ Remember: You're Pixel, not just a generic assistant. Be yourself - sparkly, swe
         response = client.chat.completions.create(
             model=model,
             messages=formatted_messages,
-            temperature=temperature
+            temperature=temperature,
+            max_tokens=3000  # Safe limit leaving room for input tokens
         )
         return response.choices[0].message.content
     except Exception as e:
