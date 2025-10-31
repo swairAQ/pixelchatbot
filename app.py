@@ -150,12 +150,14 @@ def initialize_session_state():
     if "current_conversation_id" not in st.session_state:
         st.session_state.current_conversation_id = None
     if "client" not in st.session_state:
-        # Try to initialize client from environment or preferences
-        env_api_key = os.getenv("OPENAI_API_KEY")
-        env_base_url = os.getenv("OPENAI_BASE_URL")
+        # For testing: only use stored preferences, not env variables
+        # env_api_key = os.getenv("OPENAI_API_KEY")  # Disabled for testing
+        # env_base_url = os.getenv("OPENAI_BASE_URL")  # Disabled for testing
         stored_api_key = st.session_state.preferences.get("api_key", "")
-        api_key = env_api_key or stored_api_key
-        st.session_state.client = get_openai_client(api_key, env_base_url) if api_key else None
+        if stored_api_key:
+            st.session_state.client = get_openai_client(stored_api_key)
+        else:
+            st.session_state.client = None
 
 def get_openai_client(api_key: str, base_url: Optional[str] = None) -> Optional[OpenAI]:
     """Create and return OpenAI client"""
@@ -257,7 +259,9 @@ def main():
         """, unsafe_allow_html=True)
         
         # Connection Status - Clean Badge
-        env_api_key = os.getenv("OPENAI_API_KEY")
+        # For testing: always ask user for API key (don't read from env)
+        # env_api_key = os.getenv("OPENAI_API_KEY")  # Disabled for testing
+        env_api_key = None  # Always None to force manual entry
         stored_api_key = st.session_state.preferences.get("api_key", "")
         is_connected = st.session_state.client is not None
         
@@ -272,37 +276,44 @@ def main():
         </div>
         """, unsafe_allow_html=True)
         
-        # Initialize API client
-        if env_api_key:
-            env_base_url = os.getenv("OPENAI_BASE_URL")
-            st.session_state.client = get_openai_client(env_api_key, env_base_url)
-        elif stored_api_key:
-            st.session_state.client = get_openai_client(stored_api_key)
-        else:
-            st.session_state.client = None
+        # API Key Configuration (always show for testing)
+        st.markdown("### Configuration", unsafe_allow_html=True)
+        api_key = st.text_input(
+            "API Key",
+            value=stored_api_key,
+            type="password",
+            label_visibility="collapsed",
+            placeholder="Enter OpenAI API Key"
+        )
         
-        # API Key Configuration (only if not in env)
-        if not env_api_key:
-            st.markdown("### Configuration", unsafe_allow_html=True)
-            api_key = st.text_input(
-                "API Key",
-                value=stored_api_key,
-                type="password",
-                label_visibility="collapsed",
-                placeholder="Enter OpenAI API Key"
-            )
-            
-            if api_key:
-                st.session_state.preferences["api_key"] = api_key
-                st.session_state.client = get_openai_client(api_key)
-                save_preferences(st.session_state.preferences)
+        # Update API key if changed
+        if api_key and api_key != stored_api_key:
+            st.session_state.preferences["api_key"] = api_key
+            save_preferences(st.session_state.preferences)
+            # Initialize client with new key
+            new_client = get_openai_client(api_key)
+            if new_client:
+                st.session_state.client = new_client
+                st.success("✅ API key saved and connected!")
                 st.rerun()
-            
-            st.markdown("<br>", unsafe_allow_html=True)
+            else:
+                st.session_state.client = None
+                st.error("❌ Invalid API key. Please check and try again.")
+        
+        st.markdown("<br>", unsafe_allow_html=True)
+        
+        # Initialize API client (only from stored preferences, not env)
+        if stored_api_key and not st.session_state.client:
+            # Only initialize if not already set (to avoid overriding just-set client)
+            st.session_state.client = get_openai_client(stored_api_key)
+        elif not stored_api_key:
+            st.session_state.client = None
         
         # Model Selection
         st.markdown("### Model", unsafe_allow_html=True)
-        env_model = os.getenv("OPENAI_MODEL")
+        # For testing: don't use env model
+        # env_model = os.getenv("OPENAI_MODEL")  # Disabled for testing
+        env_model = None
         default_model = env_model or st.session_state.preferences.get("model", "gpt-3.5-turbo")
         
         model_options = ["gpt-3.5-turbo", "gpt-4", "gpt-4-turbo-preview", "gpt-4o-mini", "gpt-4o"]
@@ -576,14 +587,13 @@ def main():
         # Get AI response
         if not st.session_state.client:
             with st.chat_message("assistant"):
-                st.error("Please set OPENAI_API_KEY in your .env file or enter your OpenAI API key in the sidebar settings.")
+                st.error("Please enter your OpenAI API key in the sidebar settings.")
         else:
             with st.chat_message("assistant", avatar="✨"):
                 # Enhanced loading state
                 with st.spinner("💖 Pixel is thinking..."):
-                    # Use selected model from preferences (user choice takes priority over env)
-                    model = st.session_state.preferences.get("model", 
-                        os.getenv("OPENAI_MODEL", "gpt-3.5-turbo"))
+                    # Use selected model from preferences (for testing: no env fallback)
+                    model = st.session_state.preferences.get("model", "gpt-3.5-turbo")
                     
                     response = get_openai_response(
                         st.session_state.messages,
